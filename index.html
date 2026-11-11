@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AdPulse | Performance Marketing Dashboard</title>
+<style>
+:root{--bg:#f4f6fa;--surface:#fff;--text:#161b2e;--muted:#667089;--line:#e1e5ee;--side:#111827;--side-t:#aeb7cc;--acc:#2563eb;--acc-bg:#e8f0ff;--good:#0f9d63;--good-bg:#dcf5e8;--mid:#a16207;--mid-bg:#fdf0c9;--bad:#d1372b;--bad-bg:#fde2de;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1220;--surface:#161d31;--text:#e9edf8;--muted:#98a2bd;--line:#273049;--side:#0a0f1c;--acc:#6b9bff;--acc-bg:#1c2a4d;--good:#3ddc97;--good-bg:#12352a;--mid:#f3cd62;--mid-bg:#3a3112;--bad:#ff8a7d;--bad-bg:#43201b;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.side{background:var(--side);color:var(--side-t);padding:20px 12px;position:sticky;top:0;height:100vh}
+.brand{color:#fff;font-weight:700;font-size:1.2rem;padding:4px 10px 22px;display:flex;gap:8px;align-items:center}
+.logo{background:var(--acc);color:#fff;border-radius:7px;width:28px;height:28px;display:grid;place-items:center;font-size:.9rem}
+#nav button{display:block;width:100%;text-align:left;background:none;border:0;color:inherit;padding:10px 12px;border-radius:8px;font:500 .95rem inherit;cursor:pointer;margin-bottom:2px}
+#nav button:hover{background:#ffffff14}
+#nav button[aria-current="page"]{background:var(--acc);color:#fff}
+.main{min-width:0}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.top h1{font-size:1.25rem;margin:0}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--mid-bg);color:var(--mid)}
+.pill.live{background:var(--good-bg);color:var(--good)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--text);font:inherit;font-size:.9rem}
+input[type=number]{width:100%}
+button.btn{padding:8px 14px;border:0;border-radius:7px;background:var(--acc);color:#fff;font:600 .9rem inherit;cursor:pointer}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.content{padding:20px 24px 10px}
+.pg{display:none}.pg.on{display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h3{margin:0 0 4px;font-size:1rem}.card .s{color:var(--muted);font-size:.85rem;margin:0 0 12px}
+.k span{color:var(--muted);font-size:.82rem}.k b{display:block;font-size:1.6rem;margin:2px 0}
+.d{font-size:.8rem;font-weight:600}.d.up{color:var(--good)}.d.dn{color:var(--bad)}.d.nu{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{position:static;height:auto;padding:10px}.brand{padding:0 6px 8px}#nav{display:flex;overflow-x:auto;gap:4px}#nav button{white-space:nowrap;width:auto}.grid2,.two{grid-template-columns:1fr}}
+.ins{margin:0;padding:0;list-style:none}.ins li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}.ins li:last-child{border:0}
+.row{display:grid;grid-template-columns:minmax(110px,230px) 1fr 54px;gap:10px;align-items:center;margin:9px 0;font-size:.88rem}
+.track{position:relative;height:16px;background:var(--bg);border-radius:4px}
+.fill{height:100%;border-radius:4px}.fill.Scale{background:var(--good)}.fill.Watch{background:#e3a008}.fill.Pause{background:var(--bad)}
+.tgt{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.5}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:.88rem}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
+th:hover{color:var(--text)}tr:last-child td{border:0}
+.v{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:600;font-size:.78rem}
+.v.Scale{background:var(--good-bg);color:var(--good)}.v.Watch{background:var(--mid-bg);color:var(--mid)}.v.Pause{background:var(--bad-bg);color:var(--bad)}
+label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:10px}
+.note{color:var(--muted);font-size:.8rem;margin-top:8px}
+svg text{fill:var(--muted);font-size:11px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+footer{padding:10px 24px 24px;color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand"><span class="logo">▲</span>AdPulse</div><nav id="nav"></nav></aside>
+<div class="main">
+<header class="top">
+  <div><h1 id="pt">Overview</h1><span class="pill" id="src">Loading</span></div>
+  <div class="filters">
+    <select id="fA" aria-label="Audience"></select><select id="fC" aria-label="Creative"></select>
+    <input type="date" id="fFrom" aria-label="From date"><input type="date" id="fTo" aria-label="To date">
+    <button class="btn" id="exp">Export CSV</button>
+  </div>
+</header>
+<div class="content">
+<section class="pg" id="pg_overview">
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2">
+    <div class="card"><h3>Spend vs revenue</h3><p class="s">Daily totals for the selected filters</p><div id="trend"></div></div>
+    <div class="card"><h3>Key insights</h3><p class="s">Generated from your data</p><ul class="ins" id="ins"></ul></div>
+  </div>
+  <div class="card"><h3>ROAS by campaign</h3><p class="s">Revenue per ₹1 spent. The line marks the 3x scale threshold.</p><div id="bars"></div></div>
+</section>
+<section class="pg" id="pg_campaigns">
+  <div class="card"><h3>Campaigns</h3><p class="s">Creative and audience combined. Click a column to sort.</p><div class="wrap" id="tCamp"></div></div>
+  <div class="two"><div class="card"><h3>By creative</h3><div class="wrap" id="tCre"></div></div><div class="card"><h3>By format</h3><div class="wrap" id="tFmt"></div></div></div>
+</section>
+<section class="pg" id="pg_budget">
+  <div class="two">
+    <div class="card"><h3>Budget pacing</h3><p class="s">Are you on track to hit your monthly budget?</p>
+      <div class="two"><label>Monthly budget (₹)<input id="pB" type="number" min="0" value="450000"></label><label>Days in month<input id="pD" type="number" min="1" max="31" value="30"></label></div><div id="pace"></div></div>
+    <div class="card"><h3>Budget planner</h3><p class="s">Splits a new budget by ROAS. Pause creatives get nothing and 10% is kept for new tests.</p>
+      <label>New budget (₹)<input id="plB" type="number" min="0" value="20000"></label><div id="planNote" class="note"></div></div>
+  </div>
+  <div class="card"><h3>Suggested allocation</h3><div class="wrap" id="tPlan"></div></div>
+</section>
+<section class="pg" id="pg_ab">
+  <div class="card"><h3>A/B test checker</h3><p class="s">Tests whether the gap between two ads is real or luck (two-proportion z-test).</p>
+  <div class="two">
+    <div><b>Ad A</b><label>Impressions<input id="a_imp" type="number" value="100000"></label><label>Clicks<input id="a_clk" type="number" value="1800"></label><label>Purchases<input id="a_pur" type="number" value="60"></label></div>
+    <div><b>Ad B</b><label>Impressions<input id="b_imp" type="number" value="95000"></label><label>Clicks<input id="b_clk" type="number" value="1100"></label><label>Purchases<input id="b_pur" type="number" value="40"></label></div>
+  </div><div id="abOut" class="wrap"></div></div>
+</section>
+</div>
+<footer id="foot"></footer>
+</div></div>
+
+<script>
+const CONFIG = { sheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQudX70D2-4GJ8GEyoG2E1RXu26mZPWno7anQfVV0b2oAMOYpi2ejF-YrshdJlaG4jzLWY5LYTSjBPn/pub?gid=0&single=true&output=csv", builtBy: "Adinath Patil" }; // paste your published Google Sheet CSV link in sheetUrl
+// Sheet columns: Date, Creative, Format, Audience, Spend, Impressions, Clicks, Purchases, Revenue (Date and Format optional)
+
+const $ = id => document.getElementById(id);
+const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const pct = (n, d = 2) => (n * 100).toFixed(d) + "%";
+const safe = (a, b) => (b > 0 ? a / b : 0);
+const num = v => parseFloat(String(v == null ? "" : v).replace(/[^0-9.\-]/g, "")) || 0; // handles "₹5,000" and "1,00,000"
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const vb = v => `<span class="v ${v}">${v}</span>`;
+let DATA = [], PAGE = "overview"; const S = {};
+
+function sample() {
+  const cb = [["Hook A - Problem", "Video", "Women 25-34", .9], ["Hook B - Offer", "Static", "Women 25-34", .6], ["Hook A - Problem", "Video", "Men 25-34", .7], ["Hook C - Testimonial", "Carousel", "Women 25-34", 1.1]];
+  let s = "Date,Creative,Format,Audience,Spend,Impressions,Clicks,Purchases,Revenue\n";
+  for (let d = 0; d < 14; d++) for (const [c, f, a, k] of cb) {
+    const sp = 1400 + ((d * 3) % 5) * 100, im = sp * 20, cl = Math.round(im * .012 * k * (1 + (d % 3) * .05)), pu = Math.round(cl * .03 * k);
+    s += [new Date(2026, 9, 29 + d).toISOString().slice(0, 10), c, f, a, sp, im, cl, pu, pu * 380].join(",") + "\n";
+  }
+  return s;
+}
+function parseCSV(t) {
+  const rows = []; let r = [], c = "", q = false;
+  for (let i = 0; i < t.length; i++) { const ch = t[i];
+    if (q) { if (ch === '"' && t[i + 1] === '"') { c += '"'; i++; } else if (ch === '"') q = false; else c += ch; }
+    else if (ch === '"') q = true; else if (ch === ",") { r.push(c); c = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && t[i + 1] === "\n") i++; r.push(c); rows.push(r); r = []; c = ""; } else c += ch; }
+  if (c || r.length) { r.push(c); rows.push(r); }
+  return rows.filter(x => x.some(y => y.trim() !== ""));
+}
+function M(o) { const roas = safe(o.rev, o.spend); return { ctr: safe(o.clicks, o.imp), cpc: safe(o.spend, o.clicks), cpa: safe(o.spend, o.pur), roas, verdict: roas >= 3 ? "Scale" : roas >= 1.5 ? "Watch" : "Pause" }; }
+const sum = rows => rows.reduce((a, d) => ({ spend: a.spend + d.spend, imp: a.imp + d.imp, clicks: a.clicks + d.clicks, pur: a.pur + d.pur, rev: a.rev + d.rev }), { spend: 0, imp: 0, clicks: 0, pur: 0, rev: 0 });
+function group(rows, key) {
+  const g = {}; rows.forEach(d => { const k = key(d); (g[k] = g[k] || []).push(d); });
+  return Object.entries(g).map(([name, r]) => { const o = sum(r), m = M(o); return { name, ...o, ...m }; }).sort((a, b) => b.roas - a.roas);
+}
+const F = () => DATA.filter(d => (!$("fA").value || d.audience === $("fA").value) && (!$("fC").value || d.creative === $("fC").value) && (!$("fFrom").value || !d.date || d.date >= $("fFrom").value) && (!$("fTo").value || !d.date || d.date <= $("fTo").value));
+
+function table(id, rows, first) {
+  const cols = [[first, "name", esc], ["Spend", "spend", inr], ["Purchases", "pur", n => n], ["CTR", "ctr", pct], ["CPC", "cpc", inr], ["CPA", "cpa", inr], ["ROAS", "roas", v => v.toFixed(2) + "x"], ["Status", "verdict", vb]];
+  const s = S[id] || (S[id] = { k: "roas", d: -1 });
+  rows = [...rows].sort((a, b) => (a[s.k] > b[s.k] ? 1 : a[s.k] < b[s.k] ? -1 : 0) * s.d);
+  $(id).innerHTML = `<table><thead><tr>${cols.map(([l, k]) => `<th data-id="${id}" data-k="${k}" aria-sort="${s.k === k ? (s.d > 0 ? "ascending" : "descending") : "none"}">${l}${s.k === k ? (s.d > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(([, k, f]) => `<td>${f(r[k])}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+function kpi(label, val, f, delta, good) {
+  let dl = '<span class="d nu">No prior period</span>';
+  if (delta !== null) { const up = delta >= 0, cls = good === 0 ? "nu" : (up === (good > 0) ? "up" : "dn"); dl = `<span class="d ${cls}">${up ? "▲" : "▼"} ${Math.abs(delta * 100).toFixed(1)}% vs earlier half</span>`; }
+  return `<div class="card k"><span>${label}</span><b>${f(val)}</b>${dl}</div>`;
+}
+function trendSVG(days) {
+  const W = 640, H = 220, P = 44, mx = Math.max(...days.map(d => Math.max(d.spend, d.rev))) * 1.1;
+  const X = i => P + i * (W - P - 10) / (days.length - 1), Y = v => H - 26 - v / mx * (H - 44);
+  const L = (k, c) => `<polyline fill="none" stroke="${c}" stroke-width="2.5" points="${days.map((d, i) => X(i) + "," + Y(d[k])).join(" ")}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Daily spend and revenue"><line x1="${P}" x2="${W - 10}" y1="${H - 26}" y2="${H - 26}" stroke="var(--line)"/>${L("rev", "var(--good)")}${L("spend", "var(--bad)")}
+  <text x="${P}" y="${H - 8}">${days[0].name}</text><text x="${W - 10}" y="${H - 8}" text-anchor="end">${days[days.length - 1].name}</text><text x="2" y="14">${inr(mx)}</text>
+  <text x="${W - 10}" y="14" text-anchor="end" style="fill:var(--good)">Revenue</text><text x="${W - 70}" y="14" text-anchor="end" style="fill:var(--bad)">Spend</text></svg>`;
+}
+function overview(rows) {
+  if (!rows.length) { $("kpis").innerHTML = '<div class="card empty" style="grid-column:1/-1">No data for these filters. Try widening the date range or choosing All.</div>'; $("trend").innerHTML = $("ins").innerHTML = $("bars").innerHTML = ""; return; }
+  const dates = [...new Set(rows.map(r => r.date).filter(Boolean))].sort(), mid = dates[Math.floor(dates.length / 2)];
+  const cur = sum(rows), mc = M(cur); let pv = null;
+  if (dates.length >= 4) { const a = sum(rows.filter(r => r.date < mid)), b = sum(rows.filter(r => r.date >= mid)); pv = { a, b, ma: M(a), mb: M(b) }; }
+  const dl = (x, y) => pv && x ? y / x - 1 : null;
+  $("kpis").innerHTML = kpi("Spend", cur.spend, inr, pv && dl(pv.a.spend, pv.b.spend), 0) + kpi("Revenue", cur.rev, inr, pv && dl(pv.a.rev, pv.b.rev), 1) + kpi("ROAS", mc.roas, v => v.toFixed(2) + "x", pv && dl(pv.ma.roas, pv.mb.roas), 1) +
+    kpi("CPA", mc.cpa, inr, pv && dl(pv.ma.cpa, pv.mb.cpa), -1) + kpi("CTR", mc.ctr, pct, pv && dl(pv.ma.ctr, pv.mb.ctr), 1) + kpi("Purchases", cur.pur, n => n, pv && dl(pv.a.pur, pv.b.pur), 1);
+  const days = group(rows.filter(r => r.date), r => r.date).sort((a, b) => a.name < b.name ? -1 : 1);
+  $("trend").innerHTML = days.length > 1 ? trendSVG(days) : '<div class="empty">Add a Date column to see the daily trend.</div>';
+  const g = group(rows, r => r.creative + " – " + r.audience), best = g[0], worst = g[g.length - 1], fm = group(rows, r => r.format || "").filter(x => x.name);
+  const li = [`<b>Top performer:</b> ${esc(best.name)} earns ${best.roas.toFixed(2)}x ROAS. ${best.verdict === "Scale" ? "Increase its budget." : "Keep testing it."}`];
+  if (g.length > 1) li.push(worst.verdict === "Pause" ? `<b>Needs attention:</b> ${esc(worst.name)} is at ${worst.roas.toFixed(2)}x. Pause it or test a new hook.` : `<b>Weakest:</b> ${esc(worst.name)} at ${worst.roas.toFixed(2)}x. Worth watching.`);
+  if (fm.length > 1) li.push(`<b>Best format:</b> ${esc(fm[0].name)} leads at ${fm[0].roas.toFixed(2)}x ROAS.`);
+  li.push(`<b>Efficiency:</b> You pay ${inr(mc.cpa)} per purchase with a ${pct(mc.ctr)} click-through rate.`);
+  $("ins").innerHTML = li.map(x => `<li>${x}</li>`).join("");
+  const mx = Math.max(4, ...g.map(x => x.roas)) * 1.1;
+  $("bars").innerHTML = g.map(x => `<div class="row"><span>${esc(x.name)}</span><div class="track"><div class="fill ${x.verdict}" style="width:${x.roas / mx * 100}%"></div><div class="tgt" style="left:${3 / mx * 100}%"></div></div><b>${x.roas.toFixed(2)}x</b></div>`).join("");
+}
+function campaigns(rows) {
+  table("tCamp", group(rows, r => r.creative + " – " + r.audience), "Campaign");
+  table("tCre", group(rows, r => r.creative), "Creative");
+  table("tFmt", group(rows, r => r.format || "Not specified"), "Format");
+}
+function budget(rows) {
+  const days = group(rows.filter(r => r.date), r => r.date);
+  if (days.length) { const spent = days.reduce((a, d) => a + d.spend, 0), avg = spent / days.length, B = +$("pB").value || 0, D = +$("pD").value || 30, proj = avg * D, left = B - spent;
+    const st = proj > B * 1.05 ? ["Pause", "On pace to overspend"] : proj < B * .9 ? ["Watch", "On pace to underspend"] : ["Scale", "On track"];
+    $("pace").innerHTML = `<p><span class="v ${st[0]}">${st[1]}</span></p><p>Average daily spend is ${inr(avg)}, projecting <b>${inr(proj)}</b> for the month against ${inr(B)}. ${left > 0 ? `The remaining ${inr(left)} lasts about ${(left / avg).toFixed(1)} more days at this pace.` : "The budget is already used up."}</p>`;
+  } else $("pace").innerHTML = '<div class="empty">Pacing needs a Date column.</div>';
+  const g = group(rows, r => r.creative), B = +$("plB").value || 0, test = B * .1, w = g.map(x => x.roas >= 1.5 ? x.roas : 0), tw = w.reduce((a, b) => a + b, 0) || 1; let pr = 0, base = 0;
+  const out = g.map((x, i) => { const a = (B - test) * w[i] / tw; pr += a * x.roas; base += B / g.length * x.roas; return `<tr><td>${esc(x.name)}</td><td>${x.roas.toFixed(2)}x</td><td>${vb(x.verdict)}</td><td>${inr(a)}</td><td>${inr(B / g.length)}</td></tr>`; }).join("");
+  $("tPlan").innerHTML = `<table><thead><tr><th>Creative</th><th>ROAS</th><th>Status</th><th>Suggested spend</th><th>Even split</th></tr></thead><tbody>${out}<tr><td>New hook test</td><td>-</td><td>-</td><td>${inr(test)}</td><td>-</td></tr></tbody></table>`;
+  $("planNote").textContent = `Estimated revenue: ${inr(pr)} vs ${inr(base)} with an even split. This assumes returns stay constant as spend grows, which rarely holds, so recheck after a few days.`;
+}
+const phi = z => { const t = 1 / (1 + .2316419 * Math.abs(z)), d = .3989423 * Math.exp(-z * z / 2), p = d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+function zt(x1, n1, x2, n2) { const p = (x1 + x2) / (n1 + n2), se = Math.sqrt(p * (1 - p) * (1 / n1 + 1 / n2)); if (!se) return 1; return 2 * (1 - phi(Math.abs((x1 / n1 - x2 / n2) / se))); }
+function ab() {
+  const v = id => +$(id).value || 0, a = [v("a_imp"), v("a_clk"), v("a_pur")], b = [v("b_imp"), v("b_clk"), v("b_pur")];
+  const r = (n, x1, n1, x2, n2) => { const p = zt(x1, n1, x2, n2); return `<tr><td>${n}</td><td>${pct(safe(x1, n1))}</td><td>${pct(safe(x2, n2))}</td><td>${(p * 100).toFixed(1)}%</td><td>${p < .05 ? `<span class="v Scale">${x1 / n1 > x2 / n2 ? "Ad A" : "Ad B"} wins</span>` : '<span class="v Watch">Not conclusive</span>'}</td></tr>`; };
+  $("abOut").innerHTML = `<table style="margin-top:14px"><thead><tr><th>Metric</th><th>Ad A</th><th>Ad B</th><th>Chance it's luck</th><th>Result</th></tr></thead><tbody>${r("CTR", a[1], a[0], b[1], b[0])}${r("Conversion rate", a[2], a[1], b[2], b[1])}</tbody></table><p class="note">Conclusive means under a 5% chance the gap is luck (95% confidence). If not conclusive, keep the test running.</p>`;
+}
+const PAGES = [["overview", "Overview"], ["campaigns", "Campaigns"], ["budget", "Budget & pacing"], ["ab", "A/B test"]];
+function go(p) { PAGE = p; $("pt").textContent = PAGES.find(x => x[0] === p)[1];
+  PAGES.forEach(([id]) => $("pg_" + id).classList.toggle("on", id === p));
+  document.querySelectorAll("#nav button").forEach(b => b.toggleAttribute("aria-current", b.dataset.p === p) || (b.dataset.p === p ? b.setAttribute("aria-current", "page") : 0));
+  document.querySelectorAll("#nav button").forEach(b => b.dataset.p === p ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current")); draw(); }
+function draw() { const r = F(); overview(r); campaigns(r); budget(r); ab(); }
+$("nav").innerHTML = PAGES.map(([id, l]) => `<button data-p="${id}">${l}</button>`).join("");
+$("nav").addEventListener("click", e => e.target.dataset.p && go(e.target.dataset.p));
+document.addEventListener("click", e => { const th = e.target.closest("th[data-k]"); if (!th) return; const s = S[th.dataset.id]; s.d = s.k === th.dataset.k ? -s.d : -1; s.k = th.dataset.k; draw(); });
+["fA", "fC", "fFrom", "fTo", "pB", "pD", "plB", "a_imp", "a_clk", "a_pur", "b_imp", "b_clk", "b_pur"].forEach(id => $(id).addEventListener("input", draw));
+$("exp").addEventListener("click", () => {
+  const rows = group(F(), r => r.creative + " – " + r.audience), h = "Campaign,Spend,Purchases,CTR,CPC,CPA,ROAS,Status\n";
+  const csv = h + rows.map(r => [`"${r.name}"`, r.spend, r.pur, pct(r.ctr), r.cpc.toFixed(2), r.cpa.toFixed(2), r.roas.toFixed(2), r.verdict].join(",")).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "adpulse-report.csv"; a.click();
+});
+function build(csv, live) {
+  const rows = parseCSV(csv), h = rows[0].map(x => x.trim().toLowerCase()), ix = n => h.indexOf(n);
+  const miss = ["creative", "audience", "spend", "impressions", "clicks", "purchases", "revenue"].filter(n => ix(n) < 0);
+  if (miss.length) { $("src").textContent = "Missing columns: " + miss.join(", "); return; }
+  DATA = rows.slice(1).map(r => ({ date: ix("date") < 0 ? "" : r[ix("date")].trim(), creative: r[ix("creative")], format: ix("format") < 0 ? "" : r[ix("format")], audience: r[ix("audience")], spend: num(r[ix("spend")]), imp: num(r[ix("impressions")]), clicks: num(r[ix("clicks")]), pur: num(r[ix("purchases")]), rev: num(r[ix("revenue")]) }));
+  const opt = (id, all, vals) => $(id).innerHTML = `<option value="">${all}</option>` + [...new Set(vals)].filter(Boolean).map(v => `<option>${esc(v)}</option>`).join("");
+  opt("fA", "All audiences", DATA.map(d => d.audience)); opt("fC", "All creatives", DATA.map(d => d.creative));
+  const dt = DATA.map(d => d.date).filter(Boolean).sort(); if (dt.length) { $("fFrom").value = dt[0]; $("fTo").value = dt[dt.length - 1]; }
+  $("src").textContent = live ? "Demo · Google Sheets" : "Sample data"; $("src").className = "pill" + (live ? " live" : "");
+  $("foot").textContent = (live ? "Demo data synced from Google Sheets. Sample numbers for demonstration, not real campaign results. " : "Sample data for demonstration. Connect a Google Sheet to see your own numbers. ") + "AdPulse dashboard built by " + CONFIG.builtBy + ".";
+  go("overview");
+}
+async function load() {
+  if (!CONFIG.sheetUrl) return build(sample(), false);
+  try { const r = await fetch(CONFIG.sheetUrl + (CONFIG.sheetUrl.includes("?") ? "&" : "?") + "t=" + Date.now()); if (!r.ok) throw 0; build(await r.text(), true); }
+  catch (e) { build(sample(), false); $("src").textContent = "Sample data (sheet could not load)"; }
+}
+load();
+</script>
+</body>
+</html>
